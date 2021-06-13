@@ -14,7 +14,6 @@ import tensorflow_datasets as tfds
 import vae_models
 from custom_training_classes import SSIM_Metric, PSNR_Metric, SaveReconstructions
 
-
 log_dir = "logs" 
 
 
@@ -42,26 +41,38 @@ def train_vae(data, vae_type, latent_size, beta, epochs, batch_size, keep=False,
     
 
     # LOADING DATASETS
-    dataset = tfds.load(data, as_supervised=True, batch_size=-1)
-    X_train, Y_train = tfds.as_numpy(dataset["train"])
-    X_test, Y_test = tfds.as_numpy(dataset["test"])
-    
-    if X_train.shape[3] == 1:
-        X_train = X_train.repeat(3, axis=-1)
-        X_test = X_test.repeat(3, axis=-1)
-    
-    shuffle_buffer = 1000
+    shuffle_buffer = 10000
 
-    train_data = tf.data.Dataset.from_tensor_slices(X_train)
-    train_data = train_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).shuffle(shuffle_buffer, reshuffle_each_iteration=True).batch(batch_size, drop_remainder=True)
-    train_steps = int(X_train.shape[0] / batch_size)
+    if data == "sim":
+        # NEEDS CUSTOM DATALOADER 
+        from mobrob_sim_loader import DatasetLoader
+        ds_loader = DatasetLoader(64, 20, 64, 64, 3, 2)
+        train_data = ds_loader.load("data/f_mobrob_sim_train.tfrecord", 1).unbatch().unbatch().shuffle(shuffle_buffer, reshuffle_each_iteration=True).batch(batch_size, drop_remainder=True)
+        test_data = ds_loader.load("data/f_mobrob_sim_test.tfrecord", 1).unbatch().unbatch().shuffle(shuffle_buffer, reshuffle_each_iteration=True).batch(batch_size, drop_remainder=True)
+        train_steps = 1000
+        val_steps = 100
+        test_steps = 100
+        val_data = test_data
 
-    test_data = tf.data.Dataset.from_tensor_slices(X_test)
-    test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(batch_size, drop_remainder=True)
-    test_steps = int(X_test.shape[0] / batch_size)
+    else:
+        dataset = tfds.load(data, as_supervised=True, batch_size=-1)
+        X_train, Y_train = tfds.as_numpy(dataset["train"])
+        X_test, Y_test = tfds.as_numpy(dataset["test"])
+        
+        if X_train.shape[3] == 1:
+            X_train = X_train.repeat(3, axis=-1)
+            X_test = X_test.repeat(3, axis=-1)
+        
+        train_data = tf.data.Dataset.from_tensor_slices(X_train)
+        train_data = train_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).shuffle(shuffle_buffer, reshuffle_each_iteration=True).batch(batch_size, drop_remainder=True)
+        train_steps = int(X_train.shape[0] / batch_size)
 
-    val_data = test_data
-    val_steps = test_steps
+        test_data = tf.data.Dataset.from_tensor_slices(X_test)
+        test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(batch_size, drop_remainder=True)
+        test_steps = int(X_test.shape[0] / batch_size)
+
+        val_data = test_data
+        val_steps = test_steps
 
 
     # TRAIN

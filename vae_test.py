@@ -31,14 +31,21 @@ def main():
     # LOADING DATASETS
     data = "cifar10"
 
-    dataset = tfds.load(data, split="test", as_supervised=True, batch_size=-1)
-    X_test, Y_test = tfds.as_numpy(dataset)
+    if data == "sim":
+        # NEEDS CUSTOM DATALOADER 
+        from mobrob_sim_loader import DatasetLoader
+        ds_loader = DatasetLoader(64, 20, 64, 64, 3, 2)
+        test_data = ds_loader.load("data/f_mobrob_sim_test.tfrecord", 1).unbatch()
 
-    if X_test.shape[3] == 1: # grayscale to rgb
-        X_test = X_test.repeat(3, axis=-1)
+    else:
+        dataset = tfds.load(data, split="test", as_supervised=True, batch_size=-1)
+        X_test, Y_test = tfds.as_numpy(dataset)
 
-    test_data = tf.data.Dataset.from_tensor_slices(X_test)
-    test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(20)
+        if X_test.shape[3] == 1: # grayscale to rgb
+            X_test = X_test.repeat(3, axis=-1)
+
+        test_data = tf.data.Dataset.from_tensor_slices(X_test)
+        test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(20)
 
 
 
@@ -63,12 +70,13 @@ def main():
     for images, _ in test_data:
         outputs = []
         for vae in vaes:
-            z = vae.encode(images / 255.0)
+            print(images / 255)
+            z = vae.encode(images / 255)
             reconstructions = vae.decode(z)
             outputs.append(reconstructions)
 
         for c, img in enumerate(images):
-            visualize = [img / 255.0]
+            visualize = [img / 255]
 
             for output in outputs: 
                 visualize.append(output[c])
