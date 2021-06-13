@@ -1,0 +1,4 @@
+mobrom_sim_loader.py
+./data/f_mobrob_sim_test.tfrecord
+./data/f_mobrob_sim_train.tfrecord
+

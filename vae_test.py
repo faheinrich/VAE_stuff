@@ -87,7 +87,8 @@ def main():
 
             cv2.imshow("image", np.uint8(display*255)[:,:,::-1])
             if cv2.waitKey(0) & 0xFF == 27: # use ESC to quit
-                break
+                cv2.destroyAllWindows()
+                quit()
 
 
 

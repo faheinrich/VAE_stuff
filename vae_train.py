@@ -116,9 +116,9 @@ def main():
 
 
 
-    batch_size = 128
+    batch_size = 64
     epochs = 10
-    train_vae("cifar10", "cvae", 64, 1, epochs, batch_size, keep=True, train=True)
+    train_vae("sim", "cvae", 64, 1, epochs, batch_size, keep=True, train=True)
 
 
 
