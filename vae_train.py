@@ -1,8 +1,6 @@
 import numpy as np
 np.set_printoptions(precision=4)
-#import cv2
 import shutil
-#import matplotlib.pyplot as plt
 
 import logging
 import os
@@ -99,14 +97,14 @@ def main():
         # Memory growth must be set before GPUs have been initialized
             print(e)
 
+
     if not os.path.isdir("output_images"):
         os.mkdir("output_images")
 
-    batch_size = 256
-    epochs = 10
-    
-    train_vae("cifar10", "cvae", 32, 0, epochs, batch_size, keep=True, train=True)
-    #train_vae("mnist", "cvae", 16, 1, epochs, batch_size, keep=True, train=True)
+
+    batch_size = 128
+    epochs = 4
+    train_vae("mnist", "cvae", 16, 1, epochs, batch_size, keep=True, train=True)
 
 
 
