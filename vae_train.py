@@ -116,7 +116,7 @@ def main():
 
 
 
-    batch_size = 64
+    batch_size = 100
     epochs = 10
     train_vae("sim", "cvae", 64, 1, epochs, batch_size, keep=True, train=True)
 

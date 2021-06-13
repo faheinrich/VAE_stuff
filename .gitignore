@@ -1,4 +1,9 @@
 mobrom_sim_loader.py
-./data/f_mobrob_sim_test.tfrecord
-./data/f_mobrob_sim_train.tfrecord
+data/
+data/
+logs/
+output_images/
+checkpoints_vae/
+checkpoints_rnn/
+__pycache__/
 
