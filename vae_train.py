@@ -18,6 +18,7 @@ from custom_training_classes import SSIM_Metric, PSNR_Metric, SaveReconstruction
 log_dir = "logs" 
 
 
+
 def train_vae(data, vae_type, latent_size, beta, epochs, batch_size, keep=False, train=False):
 
     # MODEL CREATION AND LOADING
@@ -98,13 +99,15 @@ def main():
             print(e)
 
 
+
     if not os.path.isdir("output_images"):
         os.mkdir("output_images")
 
 
+
     batch_size = 128
-    epochs = 4
-    train_vae("mnist", "cvae", 16, 1, epochs, batch_size, keep=True, train=True)
+    epochs = 10
+    train_vae("cifar10", "cvae", 64, 1, epochs, batch_size, keep=True, train=True)
 
 
 

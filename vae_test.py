@@ -28,27 +28,24 @@ def main():
 
 
 
-    batch_size = 40
-
-
-
     # LOADING DATASETS
-    data = "mnist"
+    data = "cifar10"
 
     dataset = tfds.load(data, split="test", as_supervised=True, batch_size=-1)
     X_test, Y_test = tfds.as_numpy(dataset)
 
-    if X_test.shape[3] == 1:
+    if X_test.shape[3] == 1: # grayscale to rgb
         X_test = X_test.repeat(3, axis=-1)
 
     test_data = tf.data.Dataset.from_tensor_slices(X_test)
-    test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(batch_size, drop_remainder=True)
+    test_data = test_data.map(lambda x: (tf.image.resize(x, (64,64)), 0)).batch(20)
 
 
 
     # ADD MODELS TO COMPARE TO EACH OTHER
     vaes = []
-    latent_sizes = [2,4,8,16,32]
+
+    latent_sizes = [64]
     betas = [1]
     for i in latent_sizes:
         for beta in betas:
@@ -66,27 +63,26 @@ def main():
     for images, _ in test_data:
         outputs = []
         for vae in vaes:
-            z = vae.encode(images)
-            x = vae.decode(z)
-            outputs.append(vae.call(x)[0])
+            z = vae.encode(images / 255.0)
+            reconstructions = vae.decode(z)
+            outputs.append(reconstructions)
 
         for c, img in enumerate(images):
-            visualize = []
-            visualize.append(img / 255.0)
+            visualize = [img / 255.0]
 
             for output in outputs: 
                 visualize.append(output[c])
 
             concat = np.concatenate(visualize, axis=1)
-            display = cv2.resize(concat, (64*len(visualize)*2, 64 * 2))
+            display_scale = 3
+            display = cv2.resize(concat, (concat.shape[1]*display_scale, concat.shape[0]*display_scale))
 
-            cv2.imshow("image", np.uint8(display * 255)[:,:,::-1])
+            cv2.imshow("image", np.uint8(display*255)[:,:,::-1])
             if cv2.waitKey(0) & 0xFF == 27: # use ESC to quit
                 break
 
 
 
-        
 if __name__ == "__main__":
     main()
 
