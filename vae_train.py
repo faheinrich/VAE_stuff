@@ -99,7 +99,8 @@ def main():
         # Memory growth must be set before GPUs have been initialized
             print(e)
 
-
+    if not os.path.isdir("output_images"):
+        os.mkdir("output_images")
 
     batch_size = 256
     epochs = 10
